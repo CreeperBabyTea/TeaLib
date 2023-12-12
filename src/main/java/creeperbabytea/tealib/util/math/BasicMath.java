@@ -9,7 +9,11 @@ public class BasicMath extends MathHelper {
         return Arrays.stream(val).sum() / val.length;
     }
 
-    public static void main(String[] args) throws Exception {
-        System.out.println(avg(114, 514));
+    public static long avg(long... val) {
+        return Arrays.stream(val).sum() / val.length;
+    }
+
+    public static double avg(double... val) {
+        return Arrays.stream(val).sum() / val.length;
     }
 }

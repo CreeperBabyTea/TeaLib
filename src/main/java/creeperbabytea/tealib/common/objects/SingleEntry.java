@@ -1,6 +1,6 @@
 package creeperbabytea.tealib.common.objects;
 
-import creeperbabytea.tealib.registry.GeneralDeferredRegister;
+import creeperbabytea.tealib.registry.GeneralRegister;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import java.lang.reflect.ParameterizedType;
@@ -16,8 +16,8 @@ public class SingleEntry<E extends IForgeRegistryEntry<E>> extends AbstractRegis
     }
 
     @Override
-    public SingleEntry<E> register(GeneralDeferredRegister register) {
-        register.register(this.getName(), this.entry, getType());
+    public SingleEntry<E> register(GeneralRegister register) {
+        register.add(this.getName(), this.entry, getType());
         return this;
     }
 

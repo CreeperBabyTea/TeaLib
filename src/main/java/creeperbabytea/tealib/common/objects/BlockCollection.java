@@ -1,6 +1,6 @@
 package creeperbabytea.tealib.common.objects;
 
-import creeperbabytea.tealib.registry.GeneralDeferredRegister;
+import creeperbabytea.tealib.registry.GeneralRegister;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.item.BlockItem;
@@ -51,9 +51,9 @@ public class BlockCollection extends AbstractCollectionEntry<BlockCollection> im
     }
 
     @Override
-    public BlockCollection register(GeneralDeferredRegister register) {
-        register.register(this.block);
-        register.register(this.blockItem);
+    public BlockCollection register(GeneralRegister register) {
+        register.add(this.block);
+        register.add(this.blockItem);
         return this;
     }
 

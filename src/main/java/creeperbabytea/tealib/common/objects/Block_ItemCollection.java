@@ -1,6 +1,6 @@
 package creeperbabytea.tealib.common.objects;
 
-import creeperbabytea.tealib.registry.GeneralDeferredRegister;
+import creeperbabytea.tealib.registry.GeneralRegister;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
@@ -19,11 +19,11 @@ public class Block_ItemCollection extends AbstractCollectionEntry<Block_ItemColl
     }
 
     @Override
-    public Block_ItemCollection register(GeneralDeferredRegister register) {
-        this.ITEMS.forEach((type, entry) -> register.register(entry.getName() + '_' + type, entry.get(), entry.getType()));
+    public Block_ItemCollection register(GeneralRegister register) {
+        this.ITEMS.forEach((type, entry) -> register.add(entry.getName() + '_' + type, entry.get(), entry.getType()));
         this.BLOCKS.forEach((type, entry) -> {
-            register.register(entry.getName() + '_' + type, entry.getBlock().get(), entry.getBlock().getType());
-            register.register(entry.getName() + '_' + type, entry.getItem().get(), entry.getItem().getType());
+            register.add(entry.getName() + '_' + type, entry.getBlock().get(), entry.getBlock().getType());
+            register.add(entry.getName() + '_' + type, entry.getItem().get(), entry.getItem().getType());
         });
         return this;
     }
@@ -71,7 +71,7 @@ public class Block_ItemCollection extends AbstractCollectionEntry<Block_ItemColl
         }
 
         @Override
-        public SingleEntry<Item> register(GeneralDeferredRegister register) {
+        public SingleEntry<Item> register(GeneralRegister register) {
             throw new IllegalStateException("Collection items shall be registered within a collection!");
         }
 

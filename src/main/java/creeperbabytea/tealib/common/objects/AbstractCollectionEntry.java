@@ -1,7 +1,5 @@
 package creeperbabytea.tealib.common.objects;
 
-import creeperbabytea.tealib.registry.GeneralDeferredRegister;
-
 import javax.annotation.Nullable;
 
 public abstract class AbstractCollectionEntry<CE extends AbstractCollectionEntry<?>> extends AbstractRegistrableEntry<AbstractCollectionEntry<CE>> {
