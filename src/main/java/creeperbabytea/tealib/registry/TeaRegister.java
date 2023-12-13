@@ -11,11 +11,9 @@ import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.RegistryBuilder;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -75,10 +73,8 @@ public class TeaRegister<T extends IForgeRegistryEntry<T>> implements IModResour
 
     @SuppressWarnings("unchecked")
     public static <T extends IForgeRegistryEntry<T>> TeaRegister<T> create(Class<T> type, String modid) {
-        if (modid.equals(TeaLib.MODID)) {
-            if (TEA_SUB_REGISTERS.containsKey(type))
-                return (TeaRegister<T>) TEA_SUB_REGISTERS.get(type).apply(modid);
-        }
+        if (TEA_SUB_REGISTERS.containsKey(type))
+            return (TeaRegister<T>) TEA_SUB_REGISTERS.get(type).apply(modid);
 
         if (MOD_SUB_REGISTERS.containsKey(modid)) {
             Map<Class<?>, Function<String, ? extends TeaRegister<?>>> map = MOD_SUB_REGISTERS.get(modid);
@@ -93,7 +89,7 @@ public class TeaRegister<T extends IForgeRegistryEntry<T>> implements IModResour
     }
 
 
-    public T add(ResourceLocation regName, T entry) {
+    public <E extends T> E add(ResourceLocation regName, E entry) {
         if (eventFired)
             throw new IllegalStateException("Cannot register new entries to TeaRegister after RegistryEvent.Register has been fired.");
         if (entry.getRegistryName() != null)
@@ -105,13 +101,22 @@ public class TeaRegister<T extends IForgeRegistryEntry<T>> implements IModResour
         return entry;
     }
 
-    public T add(String path, T entry) {
+    public <E extends T> E add(String path, E entry) {
         return this.add(modLoc(path), entry);
     }
 
     public void register(IEventBus mod) {
         mod.addListener(this::newRegistry);
         mod.register(new EventHandler(this));
+    }
+
+    public Collection<T> getEntries() {
+        return this.entries.values();
+    }
+
+    @Nullable
+    public T byKey(ResourceLocation key) {
+        return this.entries.get(key);
     }
 
     /* -------------------- CUSTOM REGISTRY STARTS -------------------- */
@@ -140,7 +145,6 @@ public class TeaRegister<T extends IForgeRegistryEntry<T>> implements IModResour
             this.entries.forEach((key, t) -> {
                 IForgeRegistry<T> reg = (IForgeRegistry<T>) event.getRegistry();
                 reg.register(t);
-                System.out.println(reg == this.customReg);
             });
         }
     }
@@ -166,5 +170,9 @@ public class TeaRegister<T extends IForgeRegistryEntry<T>> implements IModResour
     public static void init(String modid, Class<? extends IForgeRegistryEntry<?>> type, Class<? extends TeaRegister<?>> reg) {
         if (!Objects.equals(reg.getCanonicalName(), TeaRegister.class.getCanonicalName()))
             subRegister(modid, type, reg);
+    }
+
+    static {
+        SubRegisters.init();
     }
 }

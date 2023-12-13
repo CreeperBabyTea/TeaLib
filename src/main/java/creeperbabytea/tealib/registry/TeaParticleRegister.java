@@ -32,18 +32,16 @@ public class TeaParticleRegister extends TeaRegister<ParticleType<?>> {
         return (ParticleType<T>) super.add(modLoc(path), entry);
     }
 
-    @Deprecated
     @Override
-    public ParticleType<?> add(ResourceLocation regName, ParticleType<?> entry) {
+    public <E extends ParticleType<?>> E add(ResourceLocation regName, E entry) {
         if (checkAdd(entry))
             return super.add(regName, entry);
         else
             throw new IllegalStateException("Use the method that binds the particle with a factory");
     }
 
-    @Deprecated
     @Override
-    public ParticleType<?> add(String path, ParticleType<?> entry) {
+    public <E extends ParticleType<?>> E add(String path, E entry) {
         if (checkAdd(entry))
             return super.add(modLoc(path), entry);
         else
@@ -51,7 +49,7 @@ public class TeaParticleRegister extends TeaRegister<ParticleType<?>> {
     }
 
     @SuppressWarnings("unchecked")
-    private <T extends IParticleData> boolean checkAdd(ParticleType<T> entry) {
+    private <E extends ParticleType<?>, T extends IParticleData> boolean checkAdd(E entry) {
         if (entry instanceof Supplier && ((Supplier<?>) entry).get() instanceof ParticleManager.IParticleMetaFactory) {
             ParticleManager.IParticleMetaFactory<T> factory = (ParticleManager.IParticleMetaFactory<T>) ((Supplier<?>) entry).get();
             this.FACTORIES.put(entry, factory);
