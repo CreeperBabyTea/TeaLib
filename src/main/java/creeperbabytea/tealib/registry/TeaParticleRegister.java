@@ -20,36 +20,30 @@ public class TeaParticleRegister extends TeaRegister<ParticleType<?>> {
         super(ForgeRegistries.PARTICLE_TYPES, modid);
     }
 
-    @SuppressWarnings("unchecked")
     public <T extends IParticleData> ParticleType<T> add(ResourceLocation regName, ParticleType<T> entry, ParticleManager.IParticleMetaFactory<T> factory) {
         this.FACTORIES.put(entry, factory);
-        return (ParticleType<T>) super.add(regName, entry);
+        return super.add(regName, entry);
     }
 
-    @SuppressWarnings("unchecked")
     public <T extends IParticleData> ParticleType<T> add(String path, ParticleType<T> entry, ParticleManager.IParticleMetaFactory<T> factory) {
-        this.FACTORIES.put(entry, factory);
-        return (ParticleType<T>) super.add(modLoc(path), entry);
+        return this.add(modLoc(path), entry, factory);
     }
 
     @Override
     public <E extends ParticleType<?>> E add(ResourceLocation regName, E entry) {
-        if (checkAdd(entry))
+        if (checkFactory(entry))
             return super.add(regName, entry);
         else
-            throw new IllegalStateException("Use the method that binds the particle with a factory");
+            throw new IllegalStateException("No factory found for " + regName + ". Please provide the ParticleFactory");
     }
 
     @Override
     public <E extends ParticleType<?>> E add(String path, E entry) {
-        if (checkAdd(entry))
-            return super.add(modLoc(path), entry);
-        else
-            throw new IllegalStateException("Use the method that binds the particle with a factory");
+        return this.add(modLoc(path), entry);
     }
 
     @SuppressWarnings("unchecked")
-    private <E extends ParticleType<?>, T extends IParticleData> boolean checkAdd(E entry) {
+    private <E extends ParticleType<?>, T extends IParticleData> boolean checkFactory(E entry) {
         if (entry instanceof Supplier && ((Supplier<?>) entry).get() instanceof ParticleManager.IParticleMetaFactory) {
             ParticleManager.IParticleMetaFactory<T> factory = (ParticleManager.IParticleMetaFactory<T>) ((Supplier<?>) entry).get();
             this.FACTORIES.put(entry, factory);

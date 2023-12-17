@@ -16,6 +16,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * {@link DeferredRegister} is trash
@@ -132,8 +133,13 @@ public class TeaRegister<T extends IForgeRegistryEntry<T>> implements IModResour
     }
 
     public void newRegistry(RegistryEvent.NewRegistry event) {
-        if (builder != null)
-            this.customReg = builder.create();
+        if (builder != null) {
+            try {
+                this.customReg = builder.create();
+            } catch (IllegalArgumentException e) {
+                TeaLib.LOGGER.error(e, e);
+            }
+        }
     }
 
     /* -------------------- CUSTOM REGISTRY ENDS -------------------- */
