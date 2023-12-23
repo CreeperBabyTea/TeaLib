@@ -1,6 +1,7 @@
 package creeperbabytea.tealib.registry;
 
 import creeperbabytea.tealib.common.objects.AbstractRegistrableEntry;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
@@ -8,14 +9,14 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import java.util.HashMap;
 import java.util.Map;
 
-public class GeneralRegister {
-    private static final Map<String, GeneralRegister> INSTANCES = new HashMap<>();
+public class TeaGeneralRegister {
+    private static final Map<String, TeaGeneralRegister> INSTANCES = new HashMap<>();
 
-    public static GeneralRegister create(String modid) {
+    public static TeaGeneralRegister create(String modid) {
         if (INSTANCES.containsKey(modid))
             return INSTANCES.get(modid);
         else {
-            GeneralRegister ret = new GeneralRegister(modid);
+            TeaGeneralRegister ret = new TeaGeneralRegister(modid);
             INSTANCES.put(modid, ret);
             return ret;
         }
@@ -24,7 +25,7 @@ public class GeneralRegister {
     private final String modid;
     private final Map<Class<?>, TeaRegister<?>> REGISTERS = new HashMap<>();
 
-    private GeneralRegister(String modid) {
+    private TeaGeneralRegister(String modid) {
         this.modid = modid;
     }
 
@@ -43,14 +44,39 @@ public class GeneralRegister {
         return getRegister(registry.getRegistrySuperType());
     }
 
+    private Class<? extends IForgeRegistryEntry<?>> currentSuperType;
+
     public <RE extends AbstractRegistrableEntry<?>> RE add(RE entry) {
         entry.register(this);
         return entry;
     }
 
     public <T extends IForgeRegistryEntry<T>> T add(String name, T obj, Class<T> clazz) {
-        this.getRegister(clazz).add(name, obj);
+        getRegister(clazz).add(name, obj);
+        bindSuperClass(clazz);
         return obj;
+    }
+
+    public <T extends IForgeRegistryEntry<T>> T add(ResourceLocation regName, T obj, Class<T> clazz) {
+        getRegister(clazz).add(regName, obj);
+        bindSuperClass(clazz);
+        return obj;
+    }
+
+    public <T extends IForgeRegistryEntry<T>> T add(ResourceLocation regName, T obj) {
+        if (currentSuperType != null)
+            add(regName, obj);
+        throw new IllegalStateException("Cannot register an entry with an unknown super type: " + obj);
+    }
+
+    public <T extends IForgeRegistryEntry<T>> T add(String name, T obj) {
+        if (currentSuperType != null)
+            add(name, obj);
+        throw new IllegalStateException("Cannot register an entry with an unknown super type: " + obj);
+    }
+
+    public void bindSuperClass(Class<? extends IForgeRegistryEntry<?>> clazz) {
+        this.currentSuperType = clazz;
     }
 
     public void register(IEventBus mod) {

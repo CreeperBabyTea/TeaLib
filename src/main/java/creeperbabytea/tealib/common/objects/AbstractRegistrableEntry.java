@@ -1,17 +1,19 @@
 package creeperbabytea.tealib.common.objects;
 
-import creeperbabytea.tealib.registry.GeneralRegister;
+import creeperbabytea.tealib.registry.TeaGeneralRegister;
 
 public abstract class AbstractRegistrableEntry<RO extends AbstractRegistrableEntry<?>> {
-    private String name;
-    private String group;
+    private final String name;
+    private final String group;
 
     public AbstractRegistrableEntry(String name, String group) {
         this.name = name;
         this.group = group;
     }
 
-    public abstract RO register(GeneralRegister register);
+    public boolean hasCustomRegisterBehavior() {
+        return false;
+    }
 
     public String getName() {
         return name;
@@ -20,4 +22,6 @@ public abstract class AbstractRegistrableEntry<RO extends AbstractRegistrableEnt
     public String getGroup() {
         return group;
     }
+
+    public abstract RO register(TeaGeneralRegister register);
 }
