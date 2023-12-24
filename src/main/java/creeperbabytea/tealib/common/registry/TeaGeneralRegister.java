@@ -1,4 +1,4 @@
-package creeperbabytea.tealib.registry;
+package creeperbabytea.tealib.common.registry;
 
 import creeperbabytea.tealib.common.objects.AbstractRegistrableEntry;
 import net.minecraft.util.ResourceLocation;
@@ -15,11 +15,8 @@ public class TeaGeneralRegister {
     public static TeaGeneralRegister create(String modid) {
         if (INSTANCES.containsKey(modid))
             return INSTANCES.get(modid);
-        else {
-            TeaGeneralRegister ret = new TeaGeneralRegister(modid);
-            INSTANCES.put(modid, ret);
-            return ret;
-        }
+        else
+            return new TeaGeneralRegister(modid);
     }
 
     private final String modid;
@@ -27,6 +24,7 @@ public class TeaGeneralRegister {
 
     private TeaGeneralRegister(String modid) {
         this.modid = modid;
+        INSTANCES.put(modid, this);
     }
 
     @SuppressWarnings("unchecked")
@@ -51,27 +49,33 @@ public class TeaGeneralRegister {
         return entry;
     }
 
-    public <T extends IForgeRegistryEntry<T>> T add(String name, T obj, Class<T> clazz) {
+    public <E extends T, T extends IForgeRegistryEntry<T>> E add(String name, E obj, Class<T> clazz) {
         getRegister(clazz).add(name, obj);
         bindSuperClass(clazz);
         return obj;
     }
 
-    public <T extends IForgeRegistryEntry<T>> T add(ResourceLocation regName, T obj, Class<T> clazz) {
+    public <E extends T, T extends IForgeRegistryEntry<T>> E add(ResourceLocation regName, E obj, Class<T> clazz) {
         getRegister(clazz).add(regName, obj);
         bindSuperClass(clazz);
         return obj;
     }
 
-    public <T extends IForgeRegistryEntry<T>> T add(ResourceLocation regName, T obj) {
-        if (currentSuperType != null)
-            add(regName, obj);
+    @SuppressWarnings("unchecked")
+    public <E extends T, T extends IForgeRegistryEntry<T>> E add(ResourceLocation regName, E obj) {
+        if (currentSuperType != null && currentSuperType.isInstance(obj)) {
+            add(regName, obj, (Class<T>) currentSuperType);
+            return obj;
+        }
         throw new IllegalStateException("Cannot register an entry with an unknown super type: " + obj);
     }
 
-    public <T extends IForgeRegistryEntry<T>> T add(String name, T obj) {
-        if (currentSuperType != null)
-            add(name, obj);
+    @SuppressWarnings("unchecked")
+    public <E extends T, T extends IForgeRegistryEntry<T>> E add(String name, E obj) {
+        if (currentSuperType != null && currentSuperType.isInstance(obj)) {
+            add(name, obj, (Class<T>) currentSuperType);
+            return obj;
+        }
         throw new IllegalStateException("Cannot register an entry with an unknown super type: " + obj);
     }
 

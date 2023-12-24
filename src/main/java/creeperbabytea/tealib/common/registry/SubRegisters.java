@@ -1,7 +1,6 @@
-package creeperbabytea.tealib.registry;
+package creeperbabytea.tealib.common.registry;
 
 import creeperbabytea.tealib.TeaLib;
-import net.minecraft.particles.ParticleType;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.apache.logging.log4j.util.TriConsumer;

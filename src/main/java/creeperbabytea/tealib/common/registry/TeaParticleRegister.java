@@ -1,4 +1,4 @@
-package creeperbabytea.tealib.registry;
+package creeperbabytea.tealib.common.registry;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleManager;

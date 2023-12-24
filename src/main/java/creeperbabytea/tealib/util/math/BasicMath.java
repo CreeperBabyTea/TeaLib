@@ -13,6 +13,13 @@ public class BasicMath extends MathHelper {
         return Arrays.stream(val).sum() / val.length;
     }
 
+    public static float avg(float... val) {
+        double sum = 0.0;
+        for (float v : val)
+            sum += v;
+        return (float) (sum / val.length);
+    }
+
     public static double avg(double... val) {
         return Arrays.stream(val).sum() / val.length;
     }

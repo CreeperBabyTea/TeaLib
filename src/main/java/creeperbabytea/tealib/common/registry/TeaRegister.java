@@ -1,4 +1,4 @@
-package creeperbabytea.tealib.registry;
+package creeperbabytea.tealib.common.registry;
 
 import creeperbabytea.tealib.TeaLib;
 import creeperbabytea.tealib.util.IModResourceHelper;
@@ -16,7 +16,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 /**
  * {@link DeferredRegister} is trash
@@ -32,7 +31,7 @@ public class TeaRegister<T extends IForgeRegistryEntry<T>> implements IModResour
     protected final String modid;
     protected final Map<ResourceLocation, T> entries = new LinkedHashMap<>();
 
-    protected boolean eventFired = false;
+    protected boolean locked = false;
 
     protected TeaRegister(Class<T> type, String modid) {
         this.type = type;
@@ -91,7 +90,7 @@ public class TeaRegister<T extends IForgeRegistryEntry<T>> implements IModResour
 
 
     public <E extends T> E add(ResourceLocation regName, E entry) {
-        if (eventFired)
+        if (locked)
             throw new IllegalStateException("Cannot register new entries to TeaRegister after RegistryEvent.Register has been fired.");
         if (entry.getRegistryName() != null)
             this.entries.put(entry.getRegistryName(), entry);
@@ -147,7 +146,7 @@ public class TeaRegister<T extends IForgeRegistryEntry<T>> implements IModResour
     @SuppressWarnings("unchecked")
     public void onRegistry(RegistryEvent.Register<?> event) {
         if (event.getGenericType() == this.type) {
-            this.eventFired = true;
+            this.locked = true;
             this.entries.forEach((key, t) -> {
                 IForgeRegistry<T> reg = (IForgeRegistry<T>) event.getRegistry();
                 reg.register(t);

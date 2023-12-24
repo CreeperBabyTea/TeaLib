@@ -1,6 +1,6 @@
 package creeperbabytea.tealib.common.objects;
 
-import creeperbabytea.tealib.registry.TeaGeneralRegister;
+import creeperbabytea.tealib.common.registry.TeaGeneralRegister;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import java.lang.reflect.ParameterizedType;

@@ -1,7 +1,7 @@
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 
-package creeperbabytea.tealib.registry;
+package creeperbabytea.tealib.client.operation;
 
 import mcp.MethodsReturnNonnullByDefault;
 

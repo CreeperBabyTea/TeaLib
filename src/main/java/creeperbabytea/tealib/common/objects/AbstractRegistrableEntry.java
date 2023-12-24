@@ -1,8 +1,8 @@
 package creeperbabytea.tealib.common.objects;
 
-import creeperbabytea.tealib.registry.TeaGeneralRegister;
+import creeperbabytea.tealib.common.registry.TeaGeneralRegister;
 
-public abstract class AbstractRegistrableEntry<RO extends AbstractRegistrableEntry<?>> {
+public abstract class AbstractRegistrableEntry<RO extends AbstractRegistrableEntry<RO>> {
     private final String name;
     private final String group;
 

@@ -2,7 +2,7 @@ package creeperbabytea.tealib.common.objects;
 
 import javax.annotation.Nullable;
 
-public abstract class AbstractCollectionEntry<CE extends AbstractCollectionEntry<?>> extends AbstractRegistrableEntry<AbstractCollectionEntry<CE>> {
+public abstract class AbstractCollectionEntry<CE extends AbstractCollectionEntry<CE>> extends AbstractRegistrableEntry<AbstractCollectionEntry<CE>> {
     public AbstractCollectionEntry(String name, String group) {
         super(name, group);
     }
