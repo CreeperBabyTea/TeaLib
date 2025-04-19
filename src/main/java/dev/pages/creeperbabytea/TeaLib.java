@@ -2,6 +2,7 @@ package dev.pages.creeperbabytea;
 
 import dev.pages.creeperbabytea.client.ClientEventHandler;
 import dev.pages.creeperbabytea.client.networking.packet.RawMouseInputPacket;
+import dev.pages.creeperbabytea.common.EventHandler;
 import dev.pages.creeperbabytea.common.networking.Networking;
 import dev.pages.creeperbabytea.common.init.Packets;
 import dev.pages.creeperbabytea.common.networking.PacketListener;
@@ -31,6 +32,7 @@ public class TeaLib {
         NETWORKING = new Networking(modLoc("main"), VERSION);
 
         Packets.init(MOD);
+        EventHandler.init(MOD, GAME);
         ClientEventHandler.init(GAME);
     }
 

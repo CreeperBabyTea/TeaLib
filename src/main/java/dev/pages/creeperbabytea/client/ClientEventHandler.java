@@ -2,6 +2,7 @@ package dev.pages.creeperbabytea.client;
 
 import dev.pages.creeperbabytea.TeaLib;
 import dev.pages.creeperbabytea.client.networking.packet.RawMouseInputPacket;
+import dev.pages.creeperbabytea.mixin.GuiAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
