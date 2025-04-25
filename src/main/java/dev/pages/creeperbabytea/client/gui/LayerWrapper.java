@@ -8,37 +8,125 @@ import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 单例。INSTANCE仅在添加层的时候提供给层。
+ */
 @EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class LayerWrapper {
-    private static final List<ExpLikeLayer> EXP_LIKE = new ArrayList<>();
-    private static final List<HealthLikeLayer> HEALTH_LIKE = new ArrayList<>();
-    //+8 per
-    public static int xpBarHeight = 41;
-    //+10 per health +8 per xp
-    public static int leftHeight = 41;
-    public static int rightHeight = 41;
+    private static final LayerWrapper INSTANCE = new LayerWrapper();
 
-    public static <L extends ExpLikeLayer> L registerExpLike(L layer) {
-        EXP_LIKE.add(layer);
-        LayerWrapper.leftHeight += 9;
-        LayerWrapper.rightHeight += 9;
-        return layer;
-    }
+    private static final List<PlayerStateLayer> LAYERS = new ArrayList<>();
 
-    public static <L extends HealthLikeLayer> L registerHealthLike(L layer) {
-        HEALTH_LIKE.add(layer);
+    private LayerWrapper() {}
+
+    /**
+     * 物品栏上的所有ui的高度
+     */
+    private int hotbarHeightDefault = 41;//+9 per xp like layer
+
+    /**
+     * 物品栏上方左侧高度，即血量那一栏的高度。
+     */
+    private int aboveHotbarLeftDefault = 41;//+10 per health like layer +9 per xp like layer
+    /**
+     * 物品栏上方右侧高度，即干饭那一栏的高度。
+     */
+    private int aboveHotbarRightDefault = 41;
+    /**
+     * 物品栏旁边左侧高度
+     */
+    private int besideHotbarLeftDefault = 0;
+    /**
+     * 物品栏旁边右侧高度
+     */
+    private int besideHotbarRightDefault = 0;
+
+    public int hotbarHeight;
+    public int aboveHotbarLeft;
+    public int aboveHotbarRight;
+    public int besideHotbarLeft;
+    public int besideHotbarRight;
+
+    public static <L extends PlayerStateLayer> L register(L layer) {
+        LAYERS.add(layer);
+        layer.onAdd2Wrapper(INSTANCE);
         return layer;
     }
 
     @SubscribeEvent
     public static void onRenderingGui(RegisterGuiLayersEvent event) {
-        EXP_LIKE.forEach(l -> l.register(event));
-        HEALTH_LIKE.forEach(l -> l.register(event));
+        LAYERS.forEach(l -> l.register(event));
     }
 
     public static void reload() {
-        xpBarHeight = 41;
-        leftHeight = 41 + 9 * EXP_LIKE.size();
-        rightHeight = 41 + 9 * EXP_LIKE.size();
+        INSTANCE.hotbarHeight = INSTANCE.hotbarHeightDefault;
+        INSTANCE.aboveHotbarLeft = INSTANCE.aboveHotbarLeftDefault;
+        INSTANCE.aboveHotbarRight = INSTANCE.aboveHotbarRightDefault;
+        INSTANCE.besideHotbarLeft = INSTANCE.besideHotbarLeftDefault;
+        INSTANCE.besideHotbarRight = INSTANCE.besideHotbarRightDefault;
+    }
+
+    public static int getHotbarHeightDefault() {
+        return INSTANCE.hotbarHeightDefault;
+    }
+
+    public void addHotbarHeightDefault(int hotbarHeightDefault) {
+        this.hotbarHeightDefault += hotbarHeightDefault;
+    }
+
+    public static int getAboveHotbarLeftHeightDefault() {
+        return INSTANCE.aboveHotbarLeftDefault;
+    }
+
+    public void addAboveHotbarLeftHeightDefault(int aboveHotbarLeftHeightDefault) {
+        this.aboveHotbarLeftDefault += aboveHotbarLeftHeightDefault;
+    }
+
+    public static int getAboveHotbarRightHeightDefault() {
+        return INSTANCE.aboveHotbarRightDefault;
+    }
+
+    public void addAboveHotbarRightHeightDefault(int aboveHotbarRightHeightDefault) {
+        this.aboveHotbarRightDefault += aboveHotbarRightHeightDefault;
+    }
+
+    public static int getHotbarHeight() {
+        return INSTANCE.hotbarHeight;
+    }
+
+    public static void addHotbarHeight(int pixels) {
+        INSTANCE.hotbarHeight += pixels;
+    }
+
+    public static int getAboveHotbarLeft() {
+        return INSTANCE.aboveHotbarLeft;
+    }
+
+    public static void addAboveHotbarLeft(int pixels) {
+        INSTANCE.aboveHotbarLeft += pixels;
+    }
+
+    public static int getAboveHotbarRight() {
+        return INSTANCE.aboveHotbarRight;
+    }
+
+    public static void addAboveHotbarRight(int pixels) {
+        INSTANCE.aboveHotbarRight += pixels;
+    }
+
+    public static int getBesideHotbarLeft() {
+        return INSTANCE.besideHotbarLeft;
+    }
+
+    public static void addBesideHotbarLeft(int pixels) {
+        INSTANCE.besideHotbarLeft += pixels;
+    }
+
+    public static int getBesideHotbarRight() {
+        return INSTANCE.besideHotbarRight;
+    }
+
+    public static void addBesideHotbarRight(int pixels) {
+        INSTANCE.besideHotbarRight += pixels;
     }
 }

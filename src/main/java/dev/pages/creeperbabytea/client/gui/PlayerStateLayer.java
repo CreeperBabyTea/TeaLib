@@ -16,17 +16,24 @@ import java.util.function.Predicate;
 
 public abstract class PlayerStateLayer implements LayeredDraw.Layer {
     protected final ResourceLocation id;
-    protected final Predicate<Minecraft> show;
     protected final Function<Player, Float> value;
 
-    protected PlayerStateLayer(ResourceLocation id, Function<Player, Float> value, Predicate<Minecraft> show) {
+    protected Predicate<Minecraft> show;
+
+    protected PlayerStateLayer(ResourceLocation id, Function<Player, Float> value) {
         this.id = id;
-        this.show = show;
         this.value = value;
     }
 
-    protected PlayerStateLayer(ResourceLocation id, Function<Player, Float> value) {
-        this(id, value, mc -> true);
+    protected void onAdd2Wrapper(LayerWrapper wrapper) {
+    }
+
+    protected void setShowPredicate(Predicate<Minecraft> show) {
+        this.show = show;
+    }
+
+    protected void appendShowPredicateAND(Predicate<Minecraft> append) {
+        this.show = mc -> show.test(mc) && append.test(mc);
     }
 
     public float getValue(Player player) {

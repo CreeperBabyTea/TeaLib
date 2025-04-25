@@ -3,35 +3,35 @@ package dev.pages.creeperbabytea.client.gui;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 
 import javax.annotation.Nullable;
-import java.awt.*;
 import java.util.function.Function;
 
-public class ExpLikeLayer extends PlayerStateLayer {
-    private final Function<Player, Float> fillProgress;
+public class ExpLikeLayer extends BarLikeLayer {
+    /*public static final ResourceLocation EXP_LIKE_BACKGROUND = TeaLib.modLoc("hud/bar_exp_like_background");
+    public static final ResourceLocation EXP_LIKE_PROGRESS = TeaLib.modLoc("hud/bar_exp_like_progress");
+    public static final ResourceLocation MANA_LIKE_BACKGROUND = TeaLib.modLoc("hud/bar_mana_like_background");
+    public static final ResourceLocation MANA_LIKE_PROGRESS = TeaLib.modLoc("hud/bar_mana_like_progress");*/
+    protected final Function<Player, String> textToShow;
+
     private final int textColor;
-    private final ResourceLocation background;
-    private final ResourceLocation progress;
     protected ExpLikeLayer leftSibling;
     protected ExpLikeLayer rightSibling;
     protected int siblingAmount;
     private int index = 0;
     protected int dxOffset;
-    protected int width;
 
     /**
-     * @param rightSibling 可以在一行内添加多个ui。通过sibling添加的ui不需要再单独注册到{@link LayerWrapper}中
+     * 添加物品栏上方类似经验条的ui。原版的血量条、其他用TeaLib添加的ui会根据ui数量自动调整位置。
+     * @param rightSibling 右姊妹。可以添加右姊妹实现一行渲染多个ui。通过该方法添加的一行ui只需要将最左边一个添加到{@link LayerWrapper}。
      */
-    protected ExpLikeLayer(ResourceLocation id, Function<Player, Float> value, Function<Player, Float> fillProgress, int textColor, ResourceLocation background, ResourceLocation progress, @Nullable ExpLikeLayer rightSibling) {
-        super(id, value, mc -> mc.gameMode != null && mc.gameMode.canHurtPlayer());
-        this.fillProgress = fillProgress;
+    protected ExpLikeLayer(ResourceLocation id, Function<Player, Float> value, Function<Player, String> textToShow, int textColor, ResourceLocation backgroundSprite, ResourceLocation progressSprite, @Nullable ExpLikeLayer rightSibling) {
+        super(id, value, backgroundSprite, progressSprite);
+        this.height = 5;
         this.textColor = textColor;
-        this.background = background;
-        this.progress = progress;
+        this.textToShow = textToShow;
         if (rightSibling != null) {
             this.rightSibling = rightSibling.setIndex(this.index + 1);
             this.rightSibling.leftSibling = this;
@@ -41,27 +41,22 @@ public class ExpLikeLayer extends PlayerStateLayer {
             this.dxOffset = -91;
             this.width = (186 - siblingAmount * 4) / siblingAmount;
         } else {
-            switch (siblingAmount) {
-                case 2:
-                    this.width = 87;
-                    break;
-                case 3:
-                    this.width = 58;
-                    break;
-                case 4:
-                    this.width = (index == 1 || index == 2 ? 43 : 42);
-                    break;
-                case 5:
-                    this.width = index == 2 ? 34 : 33;
-                    break;
-                case 6:
-                    this.width = 27;
-                    break;
-                default:
-                    throw new IllegalStateException("Too many siblings registered for " + this.leftSibling);
-            }
+            this.width = switch (siblingAmount) {
+                case 2 -> 87;
+                case 3 -> 58;
+                case 4 -> (index == 1 || index == 2 ? 43 : 42);
+                case 5 -> index == 2 ? 34 : 33;
+                case 6 -> 27;
+                default -> throw new IllegalStateException("Too many siblings registered for " + this.leftSibling);
+            };
             passOffset();
         }
+    }
+
+    @Override
+    protected void onAdd2Wrapper(LayerWrapper wrapper) {
+        wrapper.addAboveHotbarLeftHeightDefault(9);
+        wrapper.addAboveHotbarRightHeightDefault(9);
     }
 
     private ExpLikeLayer setIndex(int indexIn) {
@@ -82,27 +77,22 @@ public class ExpLikeLayer extends PlayerStateLayer {
             this.rightSibling.passOffset();
     }
 
-    protected float getProgress(Player player) {
-        return fillProgress.apply(player);
-    }
-
     protected void render(GuiGraphics guiGraphics, DeltaTracker deltaTracker, Player player) {
         var value = getValue(player);
-        var progress = getProgress(player);
+        var text = getText(player);
         var xOffset = guiGraphics.guiWidth() / 2 + dxOffset;
-        var yOffset = guiGraphics.guiHeight() - LayerWrapper.xpBarHeight + 3;
-        guiGraphics.blitSprite(RenderType::guiTextured, this.background, xOffset, yOffset, width, 5);
-        guiGraphics.blitSprite(RenderType::guiTextured, this.progress, width, 5, 0, 0, xOffset, yOffset, Math.round(width * progress), 5);
-        renderText(guiGraphics, deltaTracker, player, xOffset, yOffset, value, progress);
+        var yOffset = guiGraphics.guiHeight() - LayerWrapper.getHotbarHeight() + 3;
+        renderBarBackground(guiGraphics, deltaTracker, player, xOffset, yOffset, value);
+        renderBarProgress(guiGraphics, deltaTracker, player, xOffset, yOffset, value);
+        renderText(guiGraphics, deltaTracker, player, xOffset, yOffset, value, text);
 
         if (this.rightSibling != null)
             rightSibling.render(guiGraphics, deltaTracker, player);
         else
-            LayerWrapper.xpBarHeight += 9;
+            LayerWrapper.addHotbarHeight(getAdditionHeight());
     }
 
-    protected void renderText(GuiGraphics guiGraphics, DeltaTracker deltaTracker, Player player, int xOffset, int yOffset, float value, float progress) {
-        var text = getText(player, value, progress);
+    protected void renderText(GuiGraphics guiGraphics, DeltaTracker deltaTracker, Player player, int xOffset, int yOffset, float value, String text) {
         var font = Minecraft.getInstance().font;
         var textXOffset = xOffset + width / 2 - font.width(text) / 2;
         guiGraphics.drawString(Minecraft.getInstance().font, text, textXOffset, yOffset - 3, 0, false);
@@ -112,7 +102,20 @@ public class ExpLikeLayer extends PlayerStateLayer {
         guiGraphics.drawString(Minecraft.getInstance().font, text, textXOffset, yOffset - 2, textColor, false);
     }
 
-    protected String getText(Player player, float value, float progress) {
-        return "" + value;
+    @Override
+    protected int getAdditionHeight() {
+        return 9;
+    }
+
+    /*protected int getProgressColor(Player player, float value, float progress) {
+        return 0xFFFFFFFF;
+    }
+
+    protected int getBackgroundColor(Player player, float value, float progress) {
+        return 0xFFFFFFFF;
+    }*/
+
+    protected String getText(Player player) {
+        return textToShow.apply(player);
     }
 }

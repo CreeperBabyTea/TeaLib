@@ -1,8 +1,7 @@
 package dev.pages.creeperbabytea.client;
 
 import dev.pages.creeperbabytea.TeaLib;
-import dev.pages.creeperbabytea.client.networking.packet.RawMouseInputPacket;
-import dev.pages.creeperbabytea.mixin.GuiAccessor;
+import dev.pages.creeperbabytea.client.networking.packet.CRawMouseInputPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
@@ -24,6 +23,6 @@ public class ClientEventHandler {
 
     public static void onMouseInput(InputEvent.MouseButton.Pre event) {
         if (clientPlayer.get() != null && screen.get() == null)
-            TeaLib.NETWORKING.sendToServer(RawMouseInputPacket.of(event));
+            TeaLib.NETWORKING.sendToServer(CRawMouseInputPacket.of(event));
     }
 }

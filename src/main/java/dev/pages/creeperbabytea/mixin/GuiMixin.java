@@ -1,15 +1,11 @@
 package dev.pages.creeperbabytea.mixin;
 
-import dev.pages.creeperbabytea.TeaLib;
 import dev.pages.creeperbabytea.client.gui.LayerWrapper;
 import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
 import net.neoforged.neoforge.client.gui.GuiLayerManager;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -18,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @SuppressWarnings("all")
 @Mixin(Gui.class)
-public abstract class GuiAccessor {
+public abstract class GuiMixin {
     @Accessor("leftHeight")
     abstract void setLeftHeight(int val);
 
@@ -35,8 +31,8 @@ public abstract class GuiAccessor {
 
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)
     private void onRender(GuiGraphics graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
-        setLeftHeight(LayerWrapper.leftHeight);
-        setRightHeight(LayerWrapper.rightHeight);
+        setLeftHeight(LayerWrapper.getAboveHotbarLeft());
+        setRightHeight(LayerWrapper.getAboveHotbarRight());
         getLayerManager().render(graphics, deltaTracker);
         LayerWrapper.reload();
         ci.cancel();

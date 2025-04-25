@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
+import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.network.handling.DirectionalPayloadHandler;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
@@ -42,6 +43,8 @@ public abstract class PacketProvider<P extends CustomPacketPayload> {
         return codec;
     }
 
+    public abstract void init(IEventBus mod, IEventBus game);
+
     public static class BiDirectional<P extends CustomPacketPayload> extends PacketProvider<P> {
         public BiDirectional(ResourceLocation key, StreamCodec<ByteBuf, P> codec) {
             super(key, codec);
@@ -56,6 +59,12 @@ public abstract class PacketProvider<P extends CustomPacketPayload> {
                     (packet, ctx) -> serverListeners.forEach(l -> l.onPacketReceived(packet, ctx))
             ));
         }
+
+        @Override
+        public void init(IEventBus mod, IEventBus game) {
+            clientListeners.forEach(l -> l.init(mod, game));
+            serverListeners.forEach(l -> l.init(mod, game));
+        }
     }
 
     public static class ToServer<P extends CustomPacketPayload> extends PacketProvider<P> {
@@ -68,17 +77,27 @@ public abstract class PacketProvider<P extends CustomPacketPayload> {
         public void register(PayloadRegistrar registrar) {
             registrar.playToServer(type, codec, (packet, ctx) -> serverListeners.forEach(l -> l.onPacketReceived(packet, ctx)));
         }
+
+        @Override
+        public void init(IEventBus mod, IEventBus game) {
+            serverListeners.forEach(l -> l.init(mod, game));
+        }
     }
 
     public static class ToClient<P extends CustomPacketPayload> extends PacketProvider<P> {
         public ToClient(ResourceLocation key, StreamCodec<ByteBuf, P> codec) {
             super(key, codec);
-            this.serverListeners = new ArrayList<>();
+            this.clientListeners = new ArrayList<>();
         }
 
         @Override
         public void register(PayloadRegistrar registrar) {
-            registrar.playToServer(type, codec, (packet, ctx) -> serverListeners.forEach(l -> l.onPacketReceived(packet, ctx)));
+            registrar.playToClient(type, codec, (packet, ctx) -> clientListeners.forEach(l -> l.onPacketReceived(packet, ctx)));
+        }
+
+        @Override
+        public void init(IEventBus mod, IEventBus game) {
+            clientListeners.forEach(l -> l.init(mod, game));
         }
     }
 }

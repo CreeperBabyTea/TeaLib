@@ -1,6 +1,7 @@
 package dev.pages.creeperbabytea.common.networking;
 
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.function.BiPredicate;
@@ -38,5 +39,8 @@ public abstract class PacketListener<P extends CustomPacketPayload> {
             throw new IllegalStateException("Can't cancel a listener that's not cancelable: " + this);
 
         this.cancelPredicate = this.cancelPredicate.or(appendedCondition);
+    }
+
+    public void init(IEventBus mod, IEventBus game) {
     }
 }

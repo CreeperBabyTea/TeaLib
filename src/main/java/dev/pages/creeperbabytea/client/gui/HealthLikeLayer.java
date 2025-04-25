@@ -2,7 +2,6 @@ package dev.pages.creeperbabytea.client.gui;
 
 import dev.pages.creeperbabytea.TeaLib;
 import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
@@ -10,10 +9,9 @@ import net.minecraft.world.entity.player.Player;
 
 import java.util.Arrays;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 public class HealthLikeLayer extends PlayerStateLayer {
-    private final boolean isLeft;
+    private final boolean isOnLeftSide;
     private final boolean renderOnZeroValue;
     private final int valPerIcon;
     private final int dxOffset;
@@ -23,12 +21,12 @@ public class HealthLikeLayer extends PlayerStateLayer {
     /**
      * @param sprites 渲染所需的图像。图像个数应该等于valPerIcon+1，其中第一个是空的，最后一个是满的
      */
-    protected HealthLikeLayer(ResourceLocation id, Function<Player, Float> value, Predicate<Minecraft> show, int valPerIcon, boolean isLeft, boolean renderOnZeroValue, ResourceLocation... sprites) {
-        super(id, value, show);
-        this.isLeft = isLeft;
+    protected HealthLikeLayer(ResourceLocation id, Function<Player, Float> value, int valPerIcon, boolean isOnLeftSide, boolean renderOnZeroValue, ResourceLocation... sprites) {
+        super(id, value);
+        this.isOnLeftSide = isOnLeftSide;
         this.renderOnZeroValue = renderOnZeroValue;
         this.valPerIcon = valPerIcon;
-        this.dxOffset = isLeft ? -91 : 11;
+        this.dxOffset = isOnLeftSide ? -91 : 11;
         if (sprites.length > valPerIcon + 1) {
             this.sprites = Arrays.copyOf(sprites, valPerIcon + 1);
             TeaLib.LOGGER.warn("Too many sprites found for {}! Check value per icon of the constructor.", this);
@@ -56,14 +54,14 @@ public class HealthLikeLayer extends PlayerStateLayer {
             for (int i = 0; i < 10; i++)
                 guiGraphics.blitSprite(RenderType::guiTextured, sprites[valPerIcon + 1], xOffset + 8 * i, getYOffset(guiGraphics), 9, 9);
 
-            if (this.isLeft)
+            if (this.isOnLeftSide)
                 getGui().leftHeight += lineHeight;
-            if (!this.isLeft)
+            if (!this.isOnLeftSide)
                 getGui().rightHeight += lineHeight;
         }
     }
 
     private int getYOffset(GuiGraphics guiGraphics) {
-        return guiGraphics.guiHeight() - (isLeft ? getGui().leftHeight : getGui().rightHeight);
+        return guiGraphics.guiHeight() - (isOnLeftSide ? getGui().leftHeight : getGui().rightHeight);
     }
 }

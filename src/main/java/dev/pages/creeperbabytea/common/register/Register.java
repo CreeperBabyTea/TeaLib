@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import com.mojang.serialization.Codec;
 import dev.pages.creeperbabytea.TeaLib;
 import dev.pages.creeperbabytea.common.data.AdditionalInfoProvider;
+import dev.pages.creeperbabytea.mixin.DeferredRegisterAccessor;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
@@ -15,7 +16,6 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.BiConsumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 @SuppressWarnings("unchecked")
@@ -25,11 +25,13 @@ public class Register<T> extends DeferredRegister<T> {
 
     private final ResourceLocation registry;
     private EntryInfoProvider<T> infoProvider;
+    protected Map<DeferredHolder<T, ? extends T>, Supplier<? extends T>> entriesHooked;
 
     public <I extends Registry<T>> Register(ResourceKey<I> registryKey, String modid) {
         super(registryKey, modid);
 
         this.registry = registryKey.registry();
+        this.entriesHooked = ((DeferredRegisterAccessor<T>) this).getEntries();
 
         if (!REGISTERS.containsKey(registry))
             REGISTERS.put(registry, Sets.newLinkedHashSet());
@@ -52,8 +54,8 @@ public class Register<T> extends DeferredRegister<T> {
         REGISTERS_WITH_ADDITIONAL_INFO.add(this.registry);
         if (!REGISTERS.containsKey(registry)) {
             REGISTERS.put(registry, new LinkedHashSet<>());
-            for (Register<?> register : REGISTERS.get(registry)) {
-                ((Register<T>)register).infoProvider = this.infoProvider; //不转换你报错，转换了你又说冗余...唐完了
+            for (Register<?> Register : REGISTERS.get(registry)) {
+                ((Register<T>) Register).infoProvider = this.infoProvider; //不转换你报错，转换了你又说冗余...唐完了
             }
         }
         return this;
@@ -63,7 +65,7 @@ public class Register<T> extends DeferredRegister<T> {
      * 仅用于为{@link AdditionalInfoProvider}添加额外物品信息
      */
     public Register<T> putInfo(EntryInfo<T, ? extends T> state) {
-        if (!hasAdditionalInfo()) {
+        if (noAdditionalInfo()) {
             TeaLib.LOGGER.error("Can't put state because no state for this entry type is defined: {}", this.registry);
             return this;
         }
@@ -72,14 +74,14 @@ public class Register<T> extends DeferredRegister<T> {
     }
 
     public boolean hasInfoFor(T entry) {
-        if (!hasAdditionalInfo()) {
+        if (noAdditionalInfo()) {
             return false;
         } else return this.infoProvider.containsKey(entry);
     }
 
     @Nullable
     public <I extends T> EntryInfo<T, I> getInfo(I entry) {
-        if (!hasAdditionalInfo()) {
+        if (noAdditionalInfo()) {
             TeaLib.LOGGER.error("Can't get state because no state for this entry type is defined: {}", this.registry);
             return null;
         }
@@ -88,33 +90,19 @@ public class Register<T> extends DeferredRegister<T> {
     }
 
     public void forEachEntryInfo(BiConsumer<T, EntryInfo<T, ? extends T>> consumer) {
-        if (!hasAdditionalInfo()) {
+        if (noAdditionalInfo()) {
             TeaLib.LOGGER.error("Can't run for each state because no state for this entry type is defined: {}", this.registry);
             return;
         }
         this.infoProvider.forEach(consumer);
     }
 
-    public boolean hasAdditionalInfo() {
-        return !(this.infoProvider == null);
-    }
-
-    @Override
-    public <I extends T> DeferredHolder<T, I> register(String name, Supplier<? extends I> sup) {
-        return this.register(name, (Function<ResourceLocation, ? extends I>) key -> sup.get());
-    }
-
-    @Override
-    public <I extends T> DeferredHolder<T, I> register(String name, Function<ResourceLocation, ? extends I> func) {
-        DeferredHolder<T, I> ret = super.register(name, func);
-        I i = func.apply(ret.getId());
-        if (i instanceof Registrable<?> registrable)
-            registrable.setName(ResourceLocation.fromNamespaceAndPath(this.getNamespace(), name));
-        return ret;
+    public boolean noAdditionalInfo() {
+        return this.infoProvider == null;
     }
 
     public <I extends T> EntryInfo<T, I> register(String name, EntryInfo<T, I> info) {
-        if (!this.hasAdditionalInfo())
+        if (this.noAdditionalInfo())
             this.infoProvider.put(info);
         return info.setDeferredHolder(register(name, info::get));
     }
@@ -130,7 +118,7 @@ public class Register<T> extends DeferredRegister<T> {
         throw new UnsupportedOperationException("Please use the register(IEventBus, IEventBus) method instead.");
     }
 
-    public Codec<EntryInfo.BuiltInEntryInfo<T>> getCodec() {
+    public Codec<EntryInfo.BuiltInEntryInfo<T>> getInfoCodec() {
         return infoProvider.codec;
     }
 
@@ -138,6 +126,10 @@ public class Register<T> extends DeferredRegister<T> {
      * 如果你要注册额外的事件监听器，或者实现额外的注册行为，重写这个方法。
      */
     protected void customEventRegister(IEventBus mod, IEventBus forge) {
+        entriesHooked.values().forEach(v -> {
+            if (v instanceof Registrable<?> r && r.hasCustomListeners())
+                r.registerCustomListeners(mod, forge);
+        });
     }
 
     public static void clearUp() {
