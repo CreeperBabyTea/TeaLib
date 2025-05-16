@@ -1,7 +1,7 @@
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 
-package dev.pages.creeperbabytea.client.networking.packet;
+package dev.pages.creeperbabytea.common.networking.packet;
 
 import net.minecraft.MethodsReturnNonnullByDefault;
 

@@ -1,4 +1,4 @@
-package dev.pages.creeperbabytea.client.networking.packet;
+package dev.pages.creeperbabytea.common.networking.packet;
 
 import dev.pages.creeperbabytea.TeaLib;
 import dev.pages.creeperbabytea.client.util.event.InputEventHelper;
@@ -20,7 +20,7 @@ public record CRawMouseInputPacket(boolean isLeftClick, boolean isPress, int mod
             CRawMouseInputPacket::modifiers,
             CRawMouseInputPacket::new
     );
-    public static final PacketProvider<CRawMouseInputPacket> PROVIDER = new PacketProvider.ToServer<>(TYPE, STREAM_CODEC);
+    public static final PacketProvider<CRawMouseInputPacket> PROVIDER = new PacketProvider.ToServer<>(TYPE, STREAM_CODEC, false);
 
     public static CRawMouseInputPacket of(InputEvent.MouseButton event) {
         return new CRawMouseInputPacket(InputEventHelper.isLeftButton(event), InputEventHelper.isPress(event), event.getModifiers());

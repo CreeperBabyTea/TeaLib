@@ -38,6 +38,11 @@ public abstract class BarLikeLayer extends PlayerStateLayer {
         wrapper.addAboveHotbarRightHeightDefault(getAdditionHeight());
     }
 
+    @Override
+    public float getValue(Player player) {
+        return Math.clamp(super.getValue(player), 0, 1);
+    }
+
     protected void renderBarBackground(GuiGraphics guiGraphics, DeltaTracker deltaTracker, Player player, int xOffset, int yOffset, float value) {
         guiGraphics.blitSprite(RenderType::guiTextured, this.getBackgroundSprite(), xOffset, yOffset, width, height);
     }

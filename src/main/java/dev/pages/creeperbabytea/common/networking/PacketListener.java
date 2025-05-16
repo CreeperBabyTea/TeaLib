@@ -6,6 +6,13 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.function.BiPredicate;
 
+/**
+ * 在<strong>接收端</strong>的监听器。<br>
+ * 通过{@link PacketProvider#addClientListener}以及{@link PacketProvider#addServerListener}添加
+ *
+ * @see PacketPreparer
+ * @see PacketProvider
+ */
 public abstract class PacketListener<P extends CustomPacketPayload> {
     private final boolean isCancelable;
 
@@ -22,11 +29,7 @@ public abstract class PacketListener<P extends CustomPacketPayload> {
         this(false);
     }
 
-    /**
-     * You should NOT override this method and also u can't.
-     * Change the listener behaviour in {@link #call}.
-     */
-    void onPacketReceived(P packet, IPayloadContext ctx) {
+    final void maybeCall(P packet, IPayloadContext ctx) {
         if (this.isCancelable && cancelPredicate.test(packet, ctx))
             return;
         call(packet, ctx);
@@ -39,8 +42,5 @@ public abstract class PacketListener<P extends CustomPacketPayload> {
             throw new IllegalStateException("Can't cancel a listener that's not cancelable: " + this);
 
         this.cancelPredicate = this.cancelPredicate.or(appendedCondition);
-    }
-
-    public void init(IEventBus mod, IEventBus game) {
     }
 }

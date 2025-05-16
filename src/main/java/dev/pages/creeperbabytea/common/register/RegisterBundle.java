@@ -11,11 +11,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
 
-public class Registrations {
+public class RegisterBundle {
     private final String namespace;
     private final Map<ResourceLocation, Register<?>> registers = new LinkedHashMap<>();
 
-    public Registrations(String namespace) {
+    public RegisterBundle(String namespace) {
         this.namespace = namespace;
     }
 

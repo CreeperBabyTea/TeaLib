@@ -6,7 +6,7 @@ import net.neoforged.bus.api.IEventBus;
 /**
  * 我讨厌你
  */
-public interface Registrable<T extends Registrable<T>> {
+public interface RegistrableSingleton {
     void setName(ResourceLocation name);
 
     ResourceLocation getName();
